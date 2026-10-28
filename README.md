@@ -1,3 +1,5 @@
+> **独立源码备份**：本仓库保存 [linguo2625469/workbuddy2api-panel](https://github.com/linguo2625469/workbuddy2api-panel) 的完整上游历史及本地 Windows 启动器修改。原始上游分支为 `upstream-archive`，当前分支包含本机源码扩展。来源、版本与构建说明见 [ARCHIVE.md](ARCHIVE.md)。
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/DGZSbot/ai-icon/refs/heads/main/WorkBuddy.png" alt="WorkBuddy2API" width="120">
 </p>

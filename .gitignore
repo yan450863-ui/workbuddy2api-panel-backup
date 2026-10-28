@@ -45,3 +45,19 @@ docs/
 *.zip
 server.exe
 .DS_Store
+
+# Local desktop deployment data must never enter this source archive.
+/.audit-cache/
+/资料/
+/检查资料/
+/PROJECT.md
+/ABOUT.md
+/部署/config.json
+/部署/auths/
+/部署/data/
+*.exe
+*.dll
+*.lnk
+*.bundle
+!ARCHIVE.md
+!部署/README.md
