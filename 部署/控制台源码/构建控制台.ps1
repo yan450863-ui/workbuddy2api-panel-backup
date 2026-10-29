@@ -11,7 +11,7 @@ $arguments = @(
     ('/out:' + $temporaryOutput),
     '/reference:System.dll', '/reference:System.Drawing.dll', '/reference:System.Windows.Forms.dll', '/reference:System.Web.Extensions.dll',
     '/reference:../Microsoft.Web.WebView2.Core.dll', '/reference:../Microsoft.Web.WebView2.WinForms.dll',
-    'Program.cs', 'ConnectionInfo.cs', 'ManagementForm.cs', 'LanConnection.cs'
+    'Program.cs', 'ConnectionInfo.cs', 'ManagementForm.cs', 'LanConnection.cs', 'RemoteConnection.cs', 'RemoteConnectionForm.cs', 'FirstRun.cs'
 )
 Push-Location $PSScriptRoot
 try {

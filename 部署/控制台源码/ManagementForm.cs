@@ -16,20 +16,22 @@ namespace WorkBuddyLocalConsole
         internal bool PageLoaded;
         internal string Failure = String.Empty;
 
-        internal ManagementForm(string url, string deployDirectory)
+        internal ManagementForm(string url, string deployDirectory) : this(url, deployDirectory, false) { }
+
+        internal ManagementForm(string url, string deployDirectory, bool authorization)
         {
             Uri address;
             if (!Uri.TryCreate(url, UriKind.Absolute, out address) || (address.Scheme != "http" && address.Scheme != "https"))
                 throw new ArgumentException("管理页面地址必须为 HTTP 或 HTTPS。");
             managementUrl = address.AbsoluteUri;
-            profileDirectory = Path.Combine(deployDirectory, "data", "management-webview");
+            profileDirectory = Path.Combine(deployDirectory, "data", authorization ? "remote-login-webview" : "management-webview");
             Text = "WorkBuddy 管理页面";
             StartPosition = FormStartPosition.CenterParent;
             Size = new Size(1180, 820);
             MinimumSize = new Size(800, 600);
             Font = new Font("Microsoft YaHei UI", 9f);
             FlowLayoutPanel toolbar = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 42, Padding = new Padding(6), WrapContents = false };
-            Button home = new Button { Text = "返回管理页", AutoSize = true };
+            Button home = new Button { Text = authorization ? "返回登录页" : "返回管理页", AutoSize = true };
             Button back = new Button { Text = "后退", AutoSize = true };
             Button reload = new Button { Text = "重新加载", AutoSize = true };
             status = new Label { Text = "正在初始化管理窗口…", AutoSize = true, Padding = new Padding(10, 5, 0, 0) };

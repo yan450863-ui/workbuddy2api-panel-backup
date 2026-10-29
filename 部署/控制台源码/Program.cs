@@ -11,8 +11,8 @@ using System.Reflection;
 [assembly: AssemblyDescription("启动、停止并打开本机 WorkBuddy2API 管理页面")]
 [assembly: AssemblyCompany("Local")]
 [assembly: AssemblyProduct("本地反代统一启动器")]
-[assembly: AssemblyVersion("1.4.0.0")]
-[assembly: AssemblyFileVersion("1.4.0.0")]
+[assembly: AssemblyVersion("1.5.2.0")]
+[assembly: AssemblyFileVersion("1.5.2.0")]
 
 namespace WorkBuddyLocalConsole
 {
@@ -26,16 +26,34 @@ namespace WorkBuddyLocalConsole
             {
                 if (!created)
                 {
-                    MessageBox.Show("启动器已经打开。", "本地反代统一启动器", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    for (int attempt = 0; attempt < 10; attempt++)
+                    {
+                        try { using (EventWaitHandle signal = EventWaitHandle.OpenExisting(@"Local\WorkBuddy2ApiShowConsole")) signal.Set(); break; }
+                        catch (WaitHandleCannotBeOpenedException) { Thread.Sleep(100); }
+                    }
                     return;
                 }
 
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
+                try { FirstRun.Initialize(AppDomain.CurrentDomain.BaseDirectory); }
+                catch (Exception ex) { MessageBox.Show("首次配置失败：" + ex.Message); return; }
                 MainForm form = new MainForm();
                 if (Array.IndexOf(Environment.GetCommandLineArgs(), "--panel") >= 0)
                     form.Shown += delegate { form.OpenManagementPage(); };
-                Application.Run(form);
+                if (Array.IndexOf(Environment.GetCommandLineArgs(), "--remote") >= 0)
+                    form.Shown += delegate { form.OpenRemoteConnection(); };
+                using (EventWaitHandle signal = new EventWaitHandle(false, EventResetMode.AutoReset, @"Local\WorkBuddy2ApiShowConsole"))
+                {
+                    // A second launch restores the existing window, including a hidden one.
+                    RegisteredWaitHandle registration = ThreadPool.RegisterWaitForSingleObject(signal, delegate(object state, bool timedOut) {
+                        try { form.BeginInvoke(new Action(delegate {
+                            form.Show(); form.WindowState = FormWindowState.Normal; form.BringToFront(); form.Activate();
+                        })); } catch (InvalidOperationException) { }
+                    }, null, Timeout.Infinite, false);
+                    try { Application.Run(form); }
+                    finally { registration.Unregister(null); }
+                }
                 GC.KeepAlive(mutex);
             }
         }
@@ -71,6 +89,7 @@ namespace WorkBuddyLocalConsole
         private ConnectionInfo connection;
         private int working;
         private ManagementForm managementForm;
+        private RemoteConnectionForm remoteForm;
         private Panel lanDrawer;
         private CheckBox lanEnabled;
         private TextBox lanBaseUrl;
@@ -180,6 +199,18 @@ namespace WorkBuddyLocalConsole
             serviceSelector.SelectedIndexChanged += delegate { ReloadConnection(); };
             serviceSelector.SelectedIndex = 0;
             InitializeLanDrawer();
+            Button remote = MakeButton("远程连接", Color.FromArgb(231, 236, 242), Color.FromArgb(41, 54, 69));
+            remote.SetBounds(424, 24, 124, 36);
+            Controls.Add(remote);
+            remote.Click += delegate { OpenRemoteConnection(); };
+        }
+
+        internal void OpenRemoteConnection()
+        {
+            if (remoteForm == null || remoteForm.IsDisposed) {
+                remoteForm = new RemoteConnectionForm(deployDirectory);
+                remoteForm.Show(this);
+            } else { remoteForm.WindowState = FormWindowState.Normal; remoteForm.Activate(); }
         }
 
         private void InitializeLanDrawer()

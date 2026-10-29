@@ -22,7 +22,7 @@ function Save-Result([bool]$ok, [string]$errorMessage) {
 try {
     $gateway = Join-Path $deployDirectory 'wb2api.exe'
     if (!(Test-Path -LiteralPath $gateway)) { throw '未找到本项目的 wb2api.exe。' }
-    $config = Get-Content -LiteralPath (Join-Path $deployDirectory 'config.json') -Raw | ConvertFrom-Json
+    $config = Get-Content -LiteralPath (Join-Path $deployDirectory 'config.json') -Raw -Encoding UTF8 | ConvertFrom-Json
     if ($Action -eq 'Enable' -and [string]::IsNullOrWhiteSpace($config.api_key)) { throw '请先设置 API 密钥，再开启手机连接。' }
     if ($config.listen -notmatch ':(\d+)$') { throw '无法读取当前网关端口。' }
     $port = [int]$Matches[1]

@@ -1,3 +1,7 @@
+> **社区 Windows 便携版**：启动器 v1.5.2，包含应用内管理页、局域网连接和内置 Tailscale 私人远程节点。首次运行自动创建随机密钥，默认仅本机监听。
+> [下载 Windows x64 发布包](https://github.com/yan450863-ui/workbuddy2api-panel-backup/releases/tag/launcher-v1.5.2) · [构建与使用说明](部署/README.md) · [来源与许可证](ARCHIVE.md)
+> 以下保留原始项目说明；本仓库非原作者官方续作，不保证上游服务可用。
+
 > **独立源码备份**：本仓库保存 [linguo2625469/workbuddy2api-panel](https://github.com/linguo2625469/workbuddy2api-panel) 的完整上游历史及本地 Windows 启动器修改。原始上游分支为 `upstream-archive`，当前分支包含本机源码扩展。来源、版本与构建说明见 [ARCHIVE.md](ARCHIVE.md)。
 
 <p align="center">

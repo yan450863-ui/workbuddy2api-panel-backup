@@ -1,34 +1,27 @@
-# Windows 启动器源码
+# Windows 启动器 1.5.2
 
-## 构建网关
+便携包在 [Releases](https://github.com/yan450863-ui/workbuddy2api-panel-backup/releases) 下载，完整使用说明见 [Windows-release-README.md](../scripts/Windows-release-README.md)。原始网关 MIT 版权与历史保持不变。
 
-安装 Go（版本要求见根目录 go.mod），在仓库根目录执行：
+## 运行便携包
 
-```powershell
-go test ./...
-go build -trimpath -ldflags "-s -w" -o 部署/wb2api.exe ./cmd/server
-```
+完整解压后双击 WorkBuddy控制台.exe。首次运行自动生成独立随机 API 密钥、config.json 和空数据目录；默认只监听 127.0.0.1:7863。点击“启动服务”及“打开管理页面”，使用复制的密钥登录并添加自己的账号。
 
-将根目录 config.example.json 复制为本目录 config.json，填写你自己的随机 API 密钥；仅本机使用时将 listen 设为 `127.0.0.1:7863`。真实配置、账号和数据已加入忽略规则，不应提交。
+需要 Windows 10/11 x64、.NET Framework 4.8 和 WebView2 Runtime。包内附 SDK DLL，系统运行时从 [微软](https://developer.microsoft.com/microsoft-edge/webview2/) 安装。电脑上的 Tailscale 已内置，无需另外安装；手机端仍需官方 Tailscale 客户端，登录同一账号。
 
-## 准备 WebView2
+关闭窗口不停止服务；关闭远程入口用“关闭远程”，停止网关用“停止服务”。电脑重启后按需手动开启。升级保留自己的 config.json、auths/ 和 data/，不要把这些目录上传。
 
-Windows 需安装 .NET Framework 4.8 和 Microsoft Edge WebView2 Runtime。
+## 构建
 
-从微软 NuGet 包 `Microsoft.Web.WebView2` 版本 `1.0.4314.35` 提取以下三个文件到本目录：
+1. 网关：安装根目录 go.mod 要求的 Go，在仓库根目录执行 `go build -trimpath -ldflags "-s -w" -o 部署/wb2api.exe ./cmd/server`。
+2. 远程组件：安装 Go 1.27.3 或更新版本，运行 `部署/控制台源码/远程组件/构建远程组件.ps1 -Test`，生成 `部署/管理工具/WorkBuddyRemote.exe` 并收集依赖许可证。它是独立 Go 模块。
+3. WebView2 SDK：从 NuGet `Microsoft.Web.WebView2` 版本 `1.0.4314.35` 提取 `lib/net462/Microsoft.Web.WebView2.Core.dll`、`lib/net462/Microsoft.Web.WebView2.WinForms.dll`、`runtimes/win-x64/native/WebView2Loader.dll` 到部署目录。
+4. 运行 `部署/控制台源码/构建控制台.ps1` 构建启动器。自行运行源码构建产物时，将根目录 config.example.json 复制到部署目录作为首次初始化模板；打包脚本会自动提供模板。
+5. 安装 Python 3，在仓库根目录执行 `python scripts/package-windows.py --output 资料/发布包/v1.5.2`，生成经过白名单打包和本地已知凭据扫描的便携 ZIP。
 
-- `lib/net462/Microsoft.Web.WebView2.Core.dll`
-- `lib/net462/Microsoft.Web.WebView2.WinForms.dll`
-- `runtimes/win-x64/native/WebView2Loader.dll`
+## 验证范围
 
-包地址： https://api.nuget.org/v3-flatcontainer/microsoft.web.webview2/1.0.4314.35/microsoft.web.webview2.1.0.4314.35.nupkg
+发布包已在独立临时目录解压，验证首次初始化、随机密钥隔离、已有配置保留、依赖文件及无账号管理页启动，共 11 项通过。原有启动器 33 项、局域网抽屉 23 项回归检查以及远程组件接口边界与启停检查已通过。
 
-## 构建和运行启动器
+本地内置节点曾达到已授权 Running 状态；手机外网端到端验证未完成。发布和测试通过不代表上游渠道长期可用。
 
-运行 `控制台源码/构建控制台.ps1`，生成本目录 `WorkBuddy控制台.exe` 和 `.exe.config`。随后双击程序。账号通过应用内管理页添加，不需要复制其他人的凭证。
-
-手机接入时展开局域网连接抽屉，启用并应用设置；同意 Windows 管理员授权后，按抽屉显示的 Base URL 和 API 路径填写。不要把服务无保护地开放到公网。
-
-## 回归脚本
-
-`控制台源码/验证启动器.ps1` 和 `验证局域网抽屉.ps1` 使用临时合成服务验证界面与生命周期。前者还会只读加载本机已启动的管理页；执行前须创建根目录检查资料/，并允许本机 WebView2 Runtime 启动。不会替你登录真实账号或发出模型请求。
+`验证发布包.ps1 -Archive <ZIP绝对路径>` 只使用临时随机密钥和空账号目录，不连接个人 Tailscale 节点。其他验证脚本有各自运行前提，执行前请阅读源码。
